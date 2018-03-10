@@ -19,8 +19,6 @@ public class ClientGuiView {
 
     private JFrame frame = new JFrame("Чат");
     private JTextField textField = new JTextField(50);
-    //private JTextArea messages = new JTextArea(10, 50);
-    //private JTextArea users = new JTextArea(10, 10);
     private JTextPane messages = new JTextPane();
     private JTextPane users = new JTextPane();
     private JScrollPane messagesScroll = new JScrollPane(messages);
@@ -35,7 +33,6 @@ public class ClientGuiView {
         textField.setEditable(false);
         messages.setPreferredSize(new Dimension(500, 200));
         messages.setEditable(false);
-        //messages.setLineWrap(true);
         users.setPreferredSize(new Dimension(100,200));
         users.setEditable(false);
 
@@ -115,11 +112,6 @@ public class ClientGuiView {
         SimpleAttributeSet set = new SimpleAttributeSet();
 
         boolean isScrollValueMax = scrollBar.getValue() == scrollBar.getMaximum() - scrollBar.getVisibleAmount();
-        /*System.out.println("scrollBar.getValue() " + scrollBar.getValue());
-        System.out.println("scrollBar.getMaximum() " + scrollBar.getMaximum());
-        System.out.println("scrollBar.getVisibleAmount() " + scrollBar.getVisibleAmount());
-        System.out.println("isScrollValueMax " + isScrollValueMax);
-        System.out.println();*/
 
         StyleConstants.setForeground(set, usersColors.get(model.getUserName()));
         try {
@@ -136,14 +128,8 @@ public class ClientGuiView {
 
         if (isScrollValueMax)
             scrollBar.setValue(scrollBar.getMaximum() - scrollBar.getVisibleAmount());
-            //messages.setCaretPosition(doc.getLength());;
 
         messagesScroll.updateUI();
-
-        /*System.out.println("scrollBar.getMaximum() after " + scrollBar.getMaximum());
-        System.out.println("scrollBar.getVisibleAmount() after " + scrollBar.getVisibleAmount());
-        System.out.println("scrollBar.getValue() after " + scrollBar.getValue());
-        System.out.println();*/
     }
 
     public void refreshUsers() {
@@ -151,7 +137,6 @@ public class ClientGuiView {
         Document doc = users.getStyledDocument();
         SimpleAttributeSet set = new SimpleAttributeSet();
 
-        //StringBuilder sb = new StringBuilder();
         Random rand = new Random();
         Color userColor;
 
@@ -170,10 +155,6 @@ public class ClientGuiView {
             } catch (BadLocationException e) {
                 System.out.println("BadLocationException в refreshUsers()");
             }
-
-            //sb.append(userName).append("\n");
         }
-        //users.setText(sb.toString());
-
     }
 }
