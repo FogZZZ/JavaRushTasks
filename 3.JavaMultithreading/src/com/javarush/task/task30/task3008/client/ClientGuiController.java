@@ -1,5 +1,7 @@
 package com.javarush.task.task30.task3008.client;
 
+import java.util.Random;
+
 public class ClientGuiController extends Client {
     private ClientGuiModel model = new ClientGuiModel();
     private ClientGuiView view = new ClientGuiView(this);
@@ -55,7 +57,7 @@ public class ClientGuiController extends Client {
     @Override
     protected String getUserName() {
         //return view.getUserName();
-        return "FogzTest";
+        return "FogzTest_" + (int)(new Random().nextDouble()*1000);
     }
 
     public ClientGuiModel getModel() {
