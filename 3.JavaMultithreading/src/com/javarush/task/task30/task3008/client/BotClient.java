@@ -4,14 +4,53 @@ import com.javarush.task.task30.task3008.ConsoleHelper;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 
 public class BotClient extends Client {
     public class BotSocketThread extends SocketThread {
+
+        private List<String> jokes = new ArrayList<>();
+        {
+            jokes.add("Шутка 1");
+            jokes.add("Шутка 2");
+            jokes.add("Шутка 3");
+            jokes.add("Шутка 4");
+            jokes.add("Шутка 5");
+            jokes.add("Шутка 6");
+            jokes.add("Шутка 7");
+            jokes.add("Шутка 8");
+            jokes.add("Шутка 9");
+            jokes.add("Шутка 10");
+            jokes.add("Шутка 11");
+            jokes.add("Шутка 12");
+            jokes.add("Шутка 13");
+            jokes.add("Шутка 14");
+            jokes.add("Шутка 15");
+            jokes.add("Шутка 16");
+            jokes.add("Шутка 17");
+            jokes.add("Шутка 18");
+            jokes.add("Шутка 19");
+            jokes.add("Шутка 20");
+        }
+
         @Override
         protected void clientMainLoop() throws IOException, ClassNotFoundException {
-            sendTextMessage("Привет чатику. Я бот. Понимаю команды: дата, день, месяц, год, время, час, минуты, секунды.");
+            sendTextMessage("Привет чатику. Я бот. Понимаю команды: дата, день, месяц, год, время, час, минуты, секунды, шутка.");
+            new Thread(){
+                @Override
+                public void run() {
+                    Random rand = new Random();
+                    while (true) {
+                        int randSecs = 60 + (int)(60 * 4 * rand.nextDouble());
+                        try {
+                            Thread.sleep(randSecs * 1000);
+                        } catch (InterruptedException e) {
+                            System.out.println("InterruptedException в clientMainLoop()");
+                        }
+                        sendTextMessage(jokes.get((int)(rand.nextDouble()*jokes.size())));
+                    }
+                }
+            }.start();
             super.clientMainLoop();
         }
 
@@ -48,6 +87,9 @@ public class BotClient extends Client {
             }
             else if (text.equals("секунды")) {
                 reply = new SimpleDateFormat("s").format(date);
+            }
+            else if (text.equals("шутка")) {
+                reply = jokes.get((int)(new Random().nextDouble()*jokes.size()));
             } else {
                 return;
             }
