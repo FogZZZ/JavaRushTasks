@@ -1,13 +1,12 @@
 package com.javarush.task.task30.task3008.client;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -48,6 +47,94 @@ public class ClientGuiView {
             public void actionPerformed(ActionEvent e) {
                 controller.sendTextMessage(textField.getText());
                 textField.setText("");
+            }
+        });
+
+        //добавляем слушатель для вызова контекстного меню дял приватного чата
+        messages.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger())
+                    doPop(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger())
+                    doPop(e);
+            }
+
+            private void doPop(MouseEvent e) {
+                messages.setCaretPosition(messages.viewToModel(e.getPoint()));
+                int offset = messages.getCaretPosition();
+                String userName = getClickedName(offset, 0);
+
+                // выходим, если не попали в существющий никнейм
+                if (!controller.getModel().getAllUserNames().contains(userName))
+                    return;
+
+                // показываем контекстное меню
+                new JPopupMenu() {
+                    JMenuItem privateDialog = new JMenuItem("Приватный чат с " + userName);
+                    {
+                        privateDialog.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                System.out.println("Открыт приватный чат с " + userName);
+                            }
+                        });
+                        add(privateDialog);
+                    }
+                }.show(e.getComponent(), e.getX(), e.getY());
+
+
+            }
+
+            private String getClickedName(int caretPosition, int direction) {
+                try {
+                    int start = Utilities.getWordStart(messages, caretPosition);
+                    int end = Utilities.getWordEnd(messages, caretPosition);
+                    String userName = messages.getText(start, end - start);
+
+                    //если попали в пробел(ы) возвращаем пустую строку
+                    if (userName.matches("\\s+"))
+                        return "";
+
+                    //заполняем имя влево (direction = -1), учитывая все "_"
+                    if ((direction == -1 || direction == 0) && start != 0) {
+                        if (userName.equals("_")) {
+                            String prevPart = getClickedName(start-1, -1);
+                            prevPart = prevPart.trim();
+                            userName = prevPart + userName;
+                        }
+                        else if (messages.getText(start - 1, 1).equals("_")) {
+                            String prevPart = getClickedName(start - 2, -1);
+                            prevPart = prevPart.trim();
+                            userName = prevPart + "_" + userName;
+                        }
+
+                    }
+
+                    //заполняем имя вправо (direction = 1), учитывая все "_"
+                    if ((direction == 1 || direction == 0) && end != messages.getDocument().getLength()) {
+                        if (userName.endsWith("_")) {
+                            String nextPart = getClickedName(end, 1);
+                            nextPart = nextPart.trim();
+                            userName = userName + nextPart;
+                        }
+                        else if (messages.getText(end, 1).equals("_")) {
+                            String nextPart = getClickedName(end + 1, 1);
+                            nextPart = nextPart.trim();
+                            userName = userName + "_" + nextPart;
+                        }
+                    }
+
+                    return userName;
+
+                } catch (BadLocationException exception) {
+                    System.out.println("BadLocationException в getClickedName(int caretPosition)");
+                    return null;
+                }
             }
         });
     }
@@ -128,6 +215,12 @@ public class ClientGuiView {
 
         if (isScrollValueMax)
             scrollBar.setValue(scrollBar.getMaximum() - scrollBar.getVisibleAmount());
+
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            System.out.println("InterruptedException в refreshMessages()");
+        }
 
         messagesScroll.updateUI();
     }
