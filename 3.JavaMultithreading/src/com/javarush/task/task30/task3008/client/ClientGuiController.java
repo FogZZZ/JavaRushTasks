@@ -14,6 +14,13 @@ public class ClientGuiController extends Client {
         }
 
         @Override
+        protected void processIncomingPrivateMessage(String message, boolean isBack) {
+            model.setNewMessage(message);
+            String fromUser = message.substring(0, message.indexOf(":"));
+            view.refreshPrivateMessages(fromUser, isBack);
+        }
+
+        @Override
         protected void informAboutAddingNewUser(String userName) {
             model.addUser(userName);
             view.refreshUsers();
@@ -57,16 +64,17 @@ public class ClientGuiController extends Client {
     @Override
     protected String getUserName() {
         //return view.getUserName();
-        return "FogzTest_" + (int)(new Random().nextDouble()*1000);
+        model.setMyName("FogzTest_" + (int)(new Random().nextDouble()*1000));
+        return model.getMyName();
     }
 
     public ClientGuiModel getModel() {
         return model;
     }
 
-    /*public void startPrivateChat(String userName) {
+    public void startPrivateChat(String userName) {
         view.startPrivateChat(userName);
-    }*/
+    }
 
     public static void main(String[] args) {
         ClientGuiController controller = new ClientGuiController();

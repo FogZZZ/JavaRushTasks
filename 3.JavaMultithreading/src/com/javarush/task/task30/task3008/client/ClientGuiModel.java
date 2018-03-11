@@ -7,6 +7,15 @@ import java.util.Set;
 public class ClientGuiModel {
     private final Set<String> allUserNames = new HashSet<>();
     private String newMessage;
+    private String myName;
+
+    public String getMyName() {
+        return myName;
+    }
+
+    public void setMyName(String myName) {
+        this.myName = myName;
+    }
 
     public Set<String> getAllUserNames() {
         return Collections.unmodifiableSet(allUserNames);

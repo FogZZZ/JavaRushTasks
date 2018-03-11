@@ -15,6 +15,9 @@ public class ClientGuiView {
     private final ClientGuiController controller;
 
     private final Map<String, Color> usersColors = new HashMap<>();
+    private final java.util.Map<String, JTextField> mapOfTextFileds = new HashMap<>();
+    private final java.util.Map<String, JTextPane> mapOfChats = new HashMap<>();
+    private final java.util.Map<String, JScrollPane> mapOfScrollChats = new HashMap<>();
 
     private JFrame frame = new JFrame("Чат");
     private JTextField textField = new JTextField(50);
@@ -26,6 +29,10 @@ public class ClientGuiView {
     public ClientGuiView(ClientGuiController controller) {
         this.controller = controller;
         initView();
+
+        mapOfTextFileds.put(null, textField);
+        mapOfChats.put(null, messages);
+        mapOfScrollChats.put(null, messagesScroll);
     }
 
     private void initView() {
@@ -81,6 +88,7 @@ public class ClientGuiView {
                             @Override
                             public void actionPerformed(ActionEvent e) {
                                 System.out.println("Открыт приватный чат с " + userName);
+                                controller.startPrivateChat(userName);
                             }
                         });
                         add(privateDialog);
@@ -139,6 +147,38 @@ public class ClientGuiView {
         });
     }
 
+    public void startPrivateChat(String userName) {
+        JFrame frame = new JFrame("Приватный чат с " + userName);
+        JTextField textField = new JTextField(50);
+        mapOfTextFileds.put(userName, textField);
+        JTextPane messages = new JTextPane();
+        mapOfChats.put(userName, messages);
+        System.out.println(userName);
+        System.out.println(mapOfChats.get(userName));
+        JScrollPane messagesScroll = new JScrollPane(messages);
+        mapOfScrollChats.put(userName, messagesScroll);
+
+        textField.setEditable(true);
+        messages.setPreferredSize(new Dimension(200, 500));
+        messages.setEditable(false);
+
+
+        frame.getContentPane().add(textField, BorderLayout.SOUTH);
+        frame.getContentPane().add(messagesScroll, BorderLayout.NORTH);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+
+        textField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String text = textField.getText();
+                String addressedText = userName + " " + text;
+                controller.sendPrivateTextMessage(addressedText);
+                textField.setText("");
+            }
+        });
+    }
+
     public String getServerAddress() {
         return JOptionPane.showInputDialog(
                 frame,
@@ -175,7 +215,9 @@ public class ClientGuiView {
     }
 
     public void notifyConnectionStatusChanged(boolean clientConnected) {
-        textField.setEditable(clientConnected);
+        for (JTextField textField : mapOfTextFileds.values()) {
+            textField.setEditable(clientConnected);
+        }
         if (clientConnected) {
             JOptionPane.showMessageDialog(
                     frame,
@@ -220,6 +262,48 @@ public class ClientGuiView {
             Thread.sleep(50);
         } catch (InterruptedException e) {
             System.out.println("InterruptedException в refreshMessages()");
+        }
+
+        messagesScroll.updateUI();
+    }
+
+    public void refreshPrivateMessages(String fromUser, boolean isBack) {
+        ClientGuiModel model = controller.getModel();
+        String newMessage = model.getNewMessage();
+        if (isBack)
+            newMessage = newMessage.substring(newMessage.indexOf(":")+1, newMessage.length());
+        String userName = newMessage.substring(0,newMessage.indexOf(":"));
+
+        JTextPane messages = mapOfChats.get(fromUser);
+        JScrollPane messagesScroll = mapOfScrollChats.get(fromUser);
+
+        JScrollBar scrollBar = messagesScroll.getVerticalScrollBar();
+        Document doc = messages.getStyledDocument();
+        SimpleAttributeSet set = new SimpleAttributeSet();
+
+        boolean isScrollValueMax = scrollBar.getValue() == scrollBar.getMaximum() - scrollBar.getVisibleAmount();
+
+        StyleConstants.setForeground(set, usersColors.get(userName));
+        try {
+            System.out.println(model.getNewMessage());
+            doc.insertString(doc.getLength(), newMessage + "\n", set);
+        } catch (BadLocationException e) {
+            System.out.println("BadLocationException в refreshPrivateMessages()");
+        }
+
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            System.out.println("InterruptedException в refreshPrivateMessages()");
+        }
+
+        if (isScrollValueMax)
+           scrollBar.setValue(scrollBar.getMaximum() - scrollBar.getVisibleAmount());
+
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            System.out.println("InterruptedException в refreshPrivateMessages()");
         }
 
         messagesScroll.updateUI();

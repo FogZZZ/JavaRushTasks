@@ -55,6 +55,9 @@ public class Server {
                     String text = data.substring(addressee.length()+1, data.length());
                     Message newMessage = new Message(MessageType.ADDRESSED_TEXT, userName + ": " + text);
                     sendPrivateMessage(addressee, newMessage);
+                    newMessage = new Message(MessageType.ADDRESSED_TEXT_BACK, addressee + ":" + userName + ": " + text);
+                    sendPrivateMessage(userName, newMessage);
+                    System.out.println("username: " + userName + ", message: " + newMessage.getData());
                 }
                 else {
                     ConsoleHelper.writeMessage("Принятое сообщение не является текстом.");

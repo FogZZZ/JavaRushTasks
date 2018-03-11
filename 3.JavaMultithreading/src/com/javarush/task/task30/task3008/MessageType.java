@@ -7,5 +7,6 @@ public enum MessageType {
     TEXT,
     USER_ADDED,
     USER_REMOVED,
-    ADDRESSED_TEXT
+    ADDRESSED_TEXT,
+    ADDRESSED_TEXT_BACK
 }

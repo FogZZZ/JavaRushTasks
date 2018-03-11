@@ -19,8 +19,9 @@ public class Client {
             ConsoleHelper.writeMessage(message);
         }
 
-        protected void processIncomingPrivateMessage(String message) {
-            ConsoleHelper.writeMessage("Приватное сообщение от " + message);
+        protected void processIncomingPrivateMessage(String message, boolean isBack) {
+            if (!isBack)
+                ConsoleHelper.writeMessage("Приватное сообщение от " + message);
         }
 
         protected void informAboutAddingNewUser(String userName) {
@@ -63,7 +64,10 @@ public class Client {
                     processIncomingMessage(message.getData());
                 }
                 else if (message.getType() == MessageType.ADDRESSED_TEXT) {
-                    processIncomingPrivateMessage(message.getData());
+                    processIncomingPrivateMessage(message.getData(), false);
+                }
+                else if (message.getType() == MessageType.ADDRESSED_TEXT_BACK) {
+                    processIncomingPrivateMessage(message.getData(), true);
                 }
                 else if (message.getType() == MessageType.USER_ADDED) {
                     informAboutAddingNewUser(message.getData());
