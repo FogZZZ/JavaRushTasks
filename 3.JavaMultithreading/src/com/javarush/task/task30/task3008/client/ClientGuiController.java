@@ -64,6 +64,10 @@ public class ClientGuiController extends Client {
         return model;
     }
 
+    /*public void startPrivateChat(String userName) {
+        view.startPrivateChat(userName);
+    }*/
+
     public static void main(String[] args) {
         ClientGuiController controller = new ClientGuiController();
         controller.run();

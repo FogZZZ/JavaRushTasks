@@ -49,7 +49,14 @@ public class Server {
                 if (message.getType() == MessageType.TEXT) {
                     Message newMessage = new Message(MessageType.TEXT, userName + ": " + message.getData());
                     sendBroadcastMessage(newMessage);
-                } else {
+                } else if (message.getType() == MessageType.ADDRESSED_TEXT) {
+                    String data = message.getData();
+                    String addressee = data.split("\\W")[0];
+                    String text = data.substring(addressee.length()+1, data.length());
+                    Message newMessage = new Message(MessageType.ADDRESSED_TEXT, userName + ": " + text);
+                    sendPrivateMessage(addressee, newMessage);
+                }
+                else {
                     ConsoleHelper.writeMessage("Принятое сообщение не является текстом.");
                 }
             }
@@ -96,7 +103,16 @@ public class Server {
         }
     }
 
-
+    public static void sendPrivateMessage(String addressee, Message message) {
+        try {
+            connectionMap.get(addressee).send(message);
+        } catch (IOException e) {
+            ConsoleHelper.writeMessage("Отправить приватное сообщение " + addressee + " не удалось.");
+        } catch (NullPointerException e) {
+            ConsoleHelper.writeMessage("Отправить приватное сообщение " + addressee + " не удалось." +
+                    "Пользователя нет в списке.");
+        }
+    }
 
     public static void main(String[] args) {
         int port = ConsoleHelper.readInt();

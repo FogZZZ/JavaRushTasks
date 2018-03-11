@@ -19,6 +19,10 @@ public class Client {
             ConsoleHelper.writeMessage(message);
         }
 
+        protected void processIncomingPrivateMessage(String message) {
+            ConsoleHelper.writeMessage("Приватное сообщение от " + message);
+        }
+
         protected void informAboutAddingNewUser(String userName) {
             ConsoleHelper.writeMessage("Участник с именем " + userName + " присоединился к чату.");
         }
@@ -57,6 +61,9 @@ public class Client {
                 Message message = connection.receive();
                 if (message.getType() == MessageType.TEXT) {
                     processIncomingMessage(message.getData());
+                }
+                else if (message.getType() == MessageType.ADDRESSED_TEXT) {
+                    processIncomingPrivateMessage(message.getData());
                 }
                 else if (message.getType() == MessageType.USER_ADDED) {
                     informAboutAddingNewUser(message.getData());
@@ -117,6 +124,16 @@ public class Client {
         }
     }
 
+    protected void sendPrivateTextMessage(String addressedText) {
+        try {
+            Message message = new Message(MessageType.ADDRESSED_TEXT, addressedText);
+            connection.send(message);
+        } catch (IOException e) {
+            ConsoleHelper.writeMessage(e.getMessage());
+            clientConnected = false;
+        }
+    }
+
     public void run() {
         SocketThread socketThread = getSocketThread();
         socketThread.setDaemon(true);
@@ -137,8 +154,13 @@ public class Client {
                 String text = ConsoleHelper.readString();
                 if (text.equals("exit"))
                     break;
-                if (shouldSendTextFromConsole())
-                    sendTextMessage(text);
+                if (shouldSendTextFromConsole()) {
+                    if (text.startsWith("private:")) {
+                        String addressedText = text.substring(text.indexOf(":")+1, text.length());
+                        sendPrivateTextMessage(addressedText);
+                    } else
+                        sendTextMessage(text);
+                }
             }
         } else {
             ConsoleHelper.writeMessage("Произошла ошибка во время работы клиента.");
