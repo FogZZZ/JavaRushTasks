@@ -14,10 +14,14 @@ public class ClientGuiController extends Client {
         }
 
         @Override
-        protected void processIncomingPrivateMessage(String message, boolean isBack) {
+        protected void processIncomingPrivateMessage(String message, boolean privateBack) {
             model.setNewMessage(message);
-            String fromUser = message.substring(0, message.indexOf(":"));
-            view.refreshPrivateMessages(fromUser, isBack);
+            model.setPrivateBack(privateBack);
+
+            if (!model.isPrivateChatOpened(model.getUserName()))
+                startPrivateChat(model.getUserName());
+
+            view.refreshPrivateMessages();
         }
 
         @Override
@@ -64,16 +68,21 @@ public class ClientGuiController extends Client {
     @Override
     protected String getUserName() {
         //return view.getUserName();
-        model.setMyName("FogzTest_" + (int)(new Random().nextDouble()*1000));
-        return model.getMyName();
+        String myName = "FogzTest_" + (int)(new Random().nextDouble()*1000);
+        model.setMyName(myName);
+        view.setMainChatName(myName);
+        return myName;
     }
 
     public ClientGuiModel getModel() {
         return model;
     }
 
-    public void startPrivateChat(String userName) {
-        view.startPrivateChat(userName);
+    public void startPrivateChat(String fromUser) {
+        if (!model.isPrivateChatOpened(fromUser)) {
+            model.addPrivateChat(fromUser);
+            view.startPrivateChat(fromUser);
+        }
     }
 
     public static void main(String[] args) {

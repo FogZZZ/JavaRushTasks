@@ -6,23 +6,32 @@ import java.util.Set;
 
 public class ClientGuiModel {
     private final Set<String> allUserNames = new HashSet<>();
-    private String newMessage;
+    private final Set<String> privateChats = new HashSet<>();
     private String myName;
+    private String newMessage;
+    private boolean privateBack;
 
-    public String getMyName() {
-        return myName;
+    public Set<String> getAllUserNames() {
+        return Collections.unmodifiableSet(allUserNames);
     }
 
     public void setMyName(String myName) {
         this.myName = myName;
     }
 
-    public Set<String> getAllUserNames() {
-        return Collections.unmodifiableSet(allUserNames);
+    public String getMyName() {
+        return myName;
     }
 
     public String getNewMessage() {
-        return newMessage;
+        if (privateBack) {
+            privateBack = false;
+            newMessage = newMessage.substring(newMessage.indexOf(":") + 1, newMessage.length());
+            return newMessage;
+        }
+        else {
+            return newMessage;
+        }
     }
 
     public void setNewMessage(String newMessage) {
@@ -41,5 +50,21 @@ public class ClientGuiModel {
 
     public void deleteUser(String userName) {
         allUserNames.remove(userName);
+    }
+
+    public void addPrivateChat(String fromUser) {
+        privateChats.add(fromUser);
+    }
+
+    public void deletePrivateChat(String fromUser) {
+        privateChats.remove(fromUser);
+    }
+
+    public boolean isPrivateChatOpened(String fromUser) {
+        return  privateChats.contains(fromUser);
+    }
+
+    public void setPrivateBack(boolean privateBack) {
+        this.privateBack = privateBack;
     }
 }
