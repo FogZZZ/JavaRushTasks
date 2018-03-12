@@ -19,9 +19,16 @@ public class Client {
             ConsoleHelper.writeMessage(message);
         }
 
-        protected void processIncomingPrivateMessage(String message, boolean isBack) {
-            if (!isBack)
+        protected void processIncomingPrivateMessage(String message, boolean privateBack) {
+            if (!privateBack)
                 ConsoleHelper.writeMessage("Приватное сообщение от " + message);
+            else {
+                String addressee = message.substring(0, message.indexOf(":"));
+                String myName = message.substring(message.indexOf(":")+1, message.indexOf(":", message.indexOf(":")+1));
+                String text = message.substring( message.indexOf(":", message.indexOf(":")+1)+2, message.length());
+
+                ConsoleHelper.writeMessage("Приватное сообщение для " + addressee + ": " + text);
+            }
         }
 
         protected void informAboutAddingNewUser(String userName) {
@@ -106,6 +113,10 @@ public class Client {
         return ConsoleHelper.readInt();
     }
 
+    public boolean isClientConnected() {
+        return clientConnected;
+    }
+
     protected String getUserName() {
         return ConsoleHelper.readString();
     }
@@ -152,7 +163,8 @@ public class Client {
         }
 
         if (clientConnected) {
-            ConsoleHelper.writeMessage("Соединение установлено. Для выхода наберите команду 'exit'.");
+            ConsoleHelper.writeMessage("Соединение установлено. Для отправки приватного сообщения наберите 'private:<user name> <text>'. " +
+                    "Для выхода наберите команду 'exit'.");
 
             while (clientConnected) {
                 String text = ConsoleHelper.readString();

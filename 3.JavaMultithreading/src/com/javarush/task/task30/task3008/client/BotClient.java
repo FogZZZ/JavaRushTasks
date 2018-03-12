@@ -8,6 +8,7 @@ import java.util.*;
 
 public class BotClient extends Client {
     public class BotSocketThread extends SocketThread {
+
         //да, шутки дурацкие
         private List<String> jokes = new ArrayList<>();
         {
@@ -56,7 +57,9 @@ public class BotClient extends Client {
 
         @Override
         protected void processIncomingMessage(String message) {
-            ConsoleHelper.writeMessage(message);
+            super.processIncomingMessage(message);
+            //ConsoleHelper.writeMessage(message);
+
             if (!message.contains(":"))
                 return;
             String userName = message.substring(0, message.indexOf(":"));
@@ -95,6 +98,48 @@ public class BotClient extends Client {
             }
 
             sendTextMessage("Информация для " + userName + ": " + reply);
+        }
+
+        @Override
+        protected void processIncomingPrivateMessage(String message, boolean privateBack) {
+            super.processIncomingPrivateMessage(message, privateBack);
+
+            String userName = message.substring(0, message.indexOf(":"));
+            String text = message.substring(message.indexOf(":")+2, message.length());
+
+            String reply = "";
+            Date date = Calendar.getInstance().getTime();
+            if (text.equals("дата")) {
+                reply = new SimpleDateFormat("d.MM.YYYY").format(date);
+            }
+            else if (text.equals("день")) {
+                reply = new SimpleDateFormat("d").format(date);
+            }
+            else if (text.equals("месяц")) {
+                reply = new SimpleDateFormat("MMMM").format(date);
+            }
+            else if (text.equals("год")) {
+                reply = new SimpleDateFormat("YYYY").format(date);
+            }
+            else if (text.equals("время")) {
+                reply = new SimpleDateFormat("H:mm:ss").format(date);
+            }
+            else if (text.equals("час")) {
+                reply = new SimpleDateFormat("H").format(date);
+            }
+            else if (text.equals("минуты")) {
+                reply = new SimpleDateFormat("m").format(date);
+            }
+            else if (text.equals("секунды")) {
+                reply = new SimpleDateFormat("s").format(date);
+            }
+            else if (text.equals("шутка")) {
+                reply = jokes.get((int)(new Random().nextDouble()*jokes.size()));
+            } else {
+                return;
+            }
+
+            sendPrivateTextMessage(userName + ":" + reply);
         }
     }
 

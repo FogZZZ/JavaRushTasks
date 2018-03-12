@@ -12,7 +12,7 @@ public class ClientGuiView {
     private final ClientGuiController controller;
 
     private final Map<String, Color> usersColors = new HashMap<>();
-    private final java.util.Map<String, JTextField> mapOfTextFileds = new HashMap<>();
+    private final java.util.Map<String, JTextField> mapOfTextFields = new HashMap<>();
     private final java.util.Map<String, JTextPane> mapOfChats = new HashMap<>();
     private final java.util.Map<String, JScrollPane> mapOfScrollChats = new HashMap<>();
 
@@ -27,15 +27,43 @@ public class ClientGuiView {
         this.controller = controller;
         initView();
 
-        mapOfTextFileds.put(null, textField);
+        mapOfTextFields.put(null, textField);
         mapOfChats.put(null, messages);
         mapOfScrollChats.put(null, messagesScroll);
+        usersColors.put(null, Color.BLACK);
     }
 
-    private class ContextMouseLitener extends MouseAdapter {
+    private void initView() {
+        textField.setEditable(false);
+        messages.setPreferredSize(new Dimension(500, 200));
+        messages.setEditable(false);
+        users.setPreferredSize(new Dimension(100,200));
+        users.setEditable(false);
+
+
+        frame.getContentPane().add(textField, BorderLayout.SOUTH);
+        frame.getContentPane().add(messagesScroll, BorderLayout.WEST);
+        frame.getContentPane().add(usersScroll, BorderLayout.EAST);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+
+        textField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                controller.sendTextMessage(textField.getText());
+                textField.setText("");
+            }
+        });
+
+        //добавляем слушатель для вызова контекстного меню для приватного чата
+        messages.addMouseListener(new ContextMouseListener(messages));
+        users.addMouseListener(new ContextMouseListener(users));
+    }
+
+    private class ContextMouseListener extends MouseAdapter {
         private JTextPane pane;
 
-        public ContextMouseLitener(JTextPane pane) {
+        public ContextMouseListener(JTextPane pane) {
             this.pane = pane;
         }
 
@@ -126,62 +154,6 @@ public class ClientGuiView {
 
     }
 
-    private void initView() {
-        textField.setEditable(false);
-        messages.setPreferredSize(new Dimension(500, 200));
-        messages.setEditable(false);
-        users.setPreferredSize(new Dimension(100,200));
-        users.setEditable(false);
-
-
-        frame.getContentPane().add(textField, BorderLayout.SOUTH);
-        frame.getContentPane().add(messagesScroll, BorderLayout.WEST);
-        frame.getContentPane().add(usersScroll, BorderLayout.EAST);
-        frame.pack();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-
-        textField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                controller.sendTextMessage(textField.getText());
-                textField.setText("");
-            }
-        });
-
-        //добавляем слушатель для вызова контекстного меню для приватного чата
-        messages.addMouseListener(new ContextMouseLitener(messages));
-        users.addMouseListener(new ContextMouseLitener(users));
-    }
-
-    public void startPrivateChat(String userName) {
-        JFrame frame = new JFrame("Приватный чат с " + userName);
-        JTextField textField = new JTextField(50);
-        mapOfTextFileds.put(userName, textField);
-        JTextPane messages = new JTextPane();
-        mapOfChats.put(userName, messages);
-        JScrollPane messagesScroll = new JScrollPane(messages);
-        mapOfScrollChats.put(userName, messagesScroll);
-
-        textField.setEditable(true);
-        messages.setPreferredSize(new Dimension(100, 300));
-        messages.setEditable(false);
-
-        frame.getContentPane().add(textField, BorderLayout.SOUTH);
-        frame.getContentPane().add(messagesScroll, BorderLayout.NORTH);
-        frame.pack();
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.setVisible(true);
-
-        textField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String text = textField.getText();
-                String addressedText = userName + " " + text;
-                controller.sendPrivateTextMessage(addressedText);
-                textField.setText("");
-            }
-        });
-    }
-
     public String getServerAddress() {
         return JOptionPane.showInputDialog(
                 frame,
@@ -222,7 +194,7 @@ public class ClientGuiView {
     }
 
     public void notifyConnectionStatusChanged(boolean clientConnected) {
-        for (JTextField textField : mapOfTextFileds.values()) {
+        for (JTextField textField : mapOfTextFields.values()) {
             textField.setEditable(clientConnected);
         }
         if (clientConnected) {
@@ -274,6 +246,73 @@ public class ClientGuiView {
         messagesScroll.updateUI();
     }
 
+    public void refreshUsers() {
+        ClientGuiModel model = controller.getModel();
+        Document doc = users.getStyledDocument();
+        SimpleAttributeSet set = new SimpleAttributeSet();
+
+        Random rand = new Random();
+        Color userColor;
+
+        users.setText("");
+        for (String userName : model.getAllUserNames()) {
+            if ((userColor = usersColors.get(userName)) == null ) {
+                userColor = new Color(rand.nextFloat()*0.5f+0.2f,
+                        rand.nextFloat()*0.5f+0.2f,
+                        rand.nextFloat()*0.5f+0.2f);
+                usersColors.put(userName, userColor);
+            }
+            StyleConstants.setForeground(set, userColor);
+
+            try {
+                doc.insertString(doc.getLength(), userName + "\n", set);
+            } catch (BadLocationException e) {
+                System.out.println("BadLocationException в refreshUsers()");
+            }
+        }
+    }
+
+    public void startPrivateChat(String userFrom) {
+        JFrame frame = new JFrame("Приватный чат с " + userFrom);
+        JTextField textField = new JTextField(25);
+        mapOfTextFields.put(userFrom, textField);
+        JTextPane messages = new JTextPane();
+        mapOfChats.put(userFrom, messages);
+        JScrollPane messagesScroll = new JScrollPane(messages);
+        mapOfScrollChats.put(userFrom, messagesScroll);
+
+        textField.setEditable(controller.isClientConnected());
+        messages.setPreferredSize(new Dimension(300, 300));
+        messages.setEditable(false);
+
+        frame.getContentPane().add(textField, BorderLayout.SOUTH);
+        frame.getContentPane().add(messagesScroll, BorderLayout.NORTH);
+        frame.pack();
+
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                mapOfTextFields.remove(userFrom);
+                mapOfChats.remove(userFrom);
+                mapOfScrollChats.remove(userFrom);
+                controller.getModel().deletePrivateChat(userFrom);
+
+                frame.dispose();
+            }
+        });
+
+        frame.setVisible(true);
+
+        textField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String text = textField.getText();
+                String addressedText = userFrom + " " + text;
+                controller.sendPrivateTextMessage(addressedText);
+                textField.setText("");
+            }
+        });
+    }
+
     public void refreshPrivateMessages() {
         ClientGuiModel model = controller.getModel();
         String userChatWith = model.getUserName();
@@ -305,7 +344,7 @@ public class ClientGuiView {
         }
 
         if (isScrollValueMax)
-           scrollBar.setValue(scrollBar.getMaximum() - scrollBar.getVisibleAmount());
+            scrollBar.setValue(scrollBar.getMaximum() - scrollBar.getVisibleAmount());
 
         try {
             Thread.sleep(50);
@@ -316,29 +355,23 @@ public class ClientGuiView {
         messagesScroll.updateUI();
     }
 
-    public void refreshUsers() {
-        ClientGuiModel model = controller.getModel();
-        Document doc = users.getStyledDocument();
-        SimpleAttributeSet set = new SimpleAttributeSet();
+    public void pausePrivateChat(String userFrom) {
+        mapOfTextFields.get(userFrom).setEditable(false);
+        Document doc = mapOfChats.get(userFrom).getDocument();
+        try {
+            doc.insertString(doc.getLength(), "Собеседник покинул чат, в данный момент невозможно отправить сообщение.\n", new SimpleAttributeSet());
+        } catch (BadLocationException ex) {
+            System.out.println("BadLocationException в pausePrivateChat(String userFrom)");
+        }
+    }
 
-        Random rand = new Random();
-        Color userColor;
-
-        users.setText("");
-        for (String userName : model.getAllUserNames()) {
-            if ((userColor = usersColors.get(userName)) == null ) {
-                userColor = new Color(rand.nextFloat()*0.5f+0.2f,
-                        rand.nextFloat()*0.5f+0.2f,
-                        rand.nextFloat()*0.5f+0.2f);
-                usersColors.put(userName, userColor);
-            }
-            StyleConstants.setForeground(set, userColor);
-
-            try {
-                doc.insertString(doc.getLength(), userName + "\n", set);
-            } catch (BadLocationException e) {
-                System.out.println("BadLocationException в refreshUsers()");
-            }
+    public void resumePrivateChat(String userFrom) {
+        mapOfTextFields.get(userFrom).setEditable(true);
+        Document doc = mapOfChats.get(userFrom).getDocument();
+        try {
+            doc.insertString(doc.getLength(), "Отправка сообщений теперь возможна.\n", new SimpleAttributeSet());
+        } catch (BadLocationException ex) {
+            System.out.println("BadLocationException в pausePrivateChat(String userFrom)");
         }
     }
 }

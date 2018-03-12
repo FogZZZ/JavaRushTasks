@@ -28,16 +28,23 @@ public class ClientGuiController extends Client {
         protected void informAboutAddingNewUser(String userName) {
             model.addUser(userName);
             view.refreshUsers();
+
+            if (model.isPrivateChatOpened(userName))
+                view.resumePrivateChat(userName);
         }
 
         @Override
         protected void informAboutDeletingNewUser(String userName) {
             model.deleteUser(userName);
             view.refreshUsers();
+
+            if (model.isPrivateChatOpened(userName))
+                view.pausePrivateChat(userName);
         }
 
         @Override
         protected void notifyConnectionStatusChanged(boolean clientConnected) {
+            super.notifyConnectionStatusChanged(clientConnected);
             view.notifyConnectionStatusChanged(clientConnected);
         }
     }

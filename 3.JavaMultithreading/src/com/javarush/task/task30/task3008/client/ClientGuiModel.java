@@ -56,8 +56,8 @@ public class ClientGuiModel {
         privateChats.add(fromUser);
     }
 
-    public void deletePrivateChat(String fromUser) {
-        privateChats.remove(fromUser);
+    public boolean deletePrivateChat(String fromUser) {
+        return privateChats.remove(fromUser);
     }
 
     public boolean isPrivateChatOpened(String fromUser) {
