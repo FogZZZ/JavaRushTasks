@@ -30,73 +30,38 @@ public class AdvertisementManager {
         }
 
         //с помощью рекурсивного метода получаем набор всех комбинаций рекламы, укладывающихся по времени в заказ
-        Set<List<Advertisement>> allPossibleCombinations = new HashSet<>();
+        List<List<Advertisement>> allPossibleCombinations = new ArrayList<>();
         List<Advertisement> startCombination = new ArrayList<>();
         recursive(startCombination, -1, 0, allPossibleCombinations);
 
-        //вычленяем комбинации с максимальным доходом (их может быть несколько с одинаковым числом полученных денег)
-        int maxAmount = 0;
-        List<List<Advertisement>> combinationsWithMaxAmount = new ArrayList<>();
         for (List<Advertisement> combination : allPossibleCombinations) {
-            int currentAmount = 0;
-            for (Advertisement ad : combination) {
-                currentAmount += ad.getAmountPerOneDisplaying();
-            }
-            if (currentAmount > maxAmount) {
-                maxAmount = currentAmount;
-                combinationsWithMaxAmount.clear();
-                combinationsWithMaxAmount.add(combination);
-            } else if (currentAmount == maxAmount) {
-                combinationsWithMaxAmount.add(combination);
-            }
+            System.out.println(combination);
         }
+        System.out.println();
 
-        //если такой набор только 1, то показываем его
-        if (combinationsWithMaxAmount.size() == 1) {
-            //показываем...
-            showVideos(combinationsWithMaxAmount.get(0));
-            return;
-        }
-
-        //если не 1, то вторичная сортировка по суммарному времени (максимальное)
-        int maxTime = 0;
-        List<List<Advertisement>> combinationsWithMaxTime = new ArrayList<>();
-        for (List<Advertisement> combination : combinationsWithMaxAmount) {
-            int currentTime = 0;
-            for (Advertisement ad : combination) {
-                currentTime += ad.getDuration();
+        //Сортируем по деньгам (макс), вторично по времени(макс), третично по количеству роликов(мин)
+        Comparator<List<Advertisement>> comparator = new Comparator<List<Advertisement>>() {
+            @Override
+            public int compare(List<Advertisement> o1, List<Advertisement> o2) {
+                long result1 = getSumAmount(o2) - getSumAmount(o1);
+                if (result1 != 0) {
+                    return (int)result1;
+                }
+                int result2 = getAllTime(o2) - getAllTime(o1);
+                if (result2 != 0) {
+                    return result2;
+                }
+                return o1.size() - o2.size();
             }
-            if (currentTime > maxTime) {
-                maxTime = currentTime;
-                combinationsWithMaxTime.clear();
-                combinationsWithMaxTime.add(combination);
-            } else if (currentTime == maxTime) {
-                combinationsWithMaxTime.add(combination);
-            }
-        }
+        };
 
-        //если такой набор только 1, то показываем его
-        if (combinationsWithMaxTime.size() == 1) {
-            //показываем...
-            showVideos(combinationsWithMaxTime.get(0));
-            return;
-        }
+        Collections.sort(allPossibleCombinations, comparator);
 
-        //Если не 1, то выбираем минимальное по количеству роликов
-        int minNumOfVideos = Integer.MAX_VALUE;
-        List<Advertisement> combinationWithMinVideos = new ArrayList<>();
-        for (List<Advertisement> combination : combinationsWithMaxTime) {
-            if (combination.size() < minNumOfVideos) {
-                minNumOfVideos = combination.size();
-                combinationWithMinVideos = combination;
-            }
-        }
-
-        //показываем...
-        showVideos(combinationWithMinVideos);
+        //показываем лучший по параметрам набор
+        showVideos(allPossibleCombinations.get(0));
     }
 
-    private void recursive(List<Advertisement> combination, int currentIndex, int currentTime, Set<List<Advertisement>> allPossibleCombinations) {
+    private void recursive(List<Advertisement> combination, int currentIndex, int currentTime, List<List<Advertisement>> allPossibleCombinations) {
         int lastIndex = storage.list().size()-1;
 
         //Если мы в конце списка, то значит поиск комбинации завершен
@@ -147,6 +112,21 @@ public class AdvertisementManager {
                     video.getAmountPerOneDisplaying()*1000 / video.getDuration());
             video.revalidate();
         }
+    }
 
+    private long getSumAmount(List<Advertisement> videos) {
+        long result = 0;
+        for (Advertisement ad : videos) {
+            result += ad.getAmountPerOneDisplaying();
+        }
+        return result;
+    }
+
+    private int getAllTime(List<Advertisement> videos) {
+        int result = 0;
+        for (Advertisement ad : videos) {
+            result += ad.getDuration();
+        }
+        return result;
     }
 }
