@@ -24,8 +24,9 @@ public class Tablet extends Observable {
             ConsoleHelper.writeMessage(order.toString());
 
             if (!order.isEmpty()) {
+                AdvertisementManager manager = new AdvertisementManager(order.getTotalCookingTime()*60);
                 try {
-                    new AdvertisementManager(order.getTotalCookingTime()*60).processVideos();
+                    manager.processVideos();
                 } catch (NoVideoAvailableException e) {
                     logger.log(Level.INFO,"No video is available for the order " + order);
                 }

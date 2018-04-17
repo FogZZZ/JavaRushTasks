@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Order {
     private final Tablet tablet;
-    protected List<Dish> dishes;
+    private List<Dish> dishes;
 
     public Order(Tablet tablet) throws IOException {
         this.tablet = tablet;
@@ -17,6 +17,10 @@ public class Order {
 
     public boolean isEmpty() {
         return dishes.isEmpty();
+    }
+
+    public List<Dish> getDishes() {
+        return dishes;
     }
 
     public int getTotalCookingTime() {

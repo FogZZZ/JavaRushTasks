@@ -1,6 +1,8 @@
 package com.javarush.task.task27.task2712.ad;
 
 import com.javarush.task.task27.task2712.ConsoleHelper;
+import com.javarush.task.task27.task2712.statistic.StatisticManager;
+import com.javarush.task.task27.task2712.statistic.event.VideoSelectedEventDataRow;
 
 import java.util.*;
 
@@ -13,7 +15,7 @@ public class AdvertisementManager {
     }
 
     public void processVideos() throws NoVideoAvailableException {
-        if (storage.list().isEmpty()) {
+        if (storage.list() == null || storage.list().isEmpty()) {
             throw new NoVideoAvailableException();
         }
 
@@ -34,20 +36,15 @@ public class AdvertisementManager {
         List<Advertisement> startCombination = new ArrayList<>();
         recursive(startCombination, -1, 0, allPossibleCombinations);
 
-        for (List<Advertisement> combination : allPossibleCombinations) {
-            System.out.println(combination);
-        }
-        System.out.println();
-
         //Сортируем по деньгам (макс), вторично по времени(макс), третично по количеству роликов(мин)
         Comparator<List<Advertisement>> comparator = new Comparator<List<Advertisement>>() {
             @Override
             public int compare(List<Advertisement> o1, List<Advertisement> o2) {
-                long result1 = getSumAmount(o2) - getSumAmount(o1);
+                long result1 = getTotalAmount(o2) - getTotalAmount(o1);
                 if (result1 != 0) {
                     return (int)result1;
                 }
-                int result2 = getAllTime(o2) - getAllTime(o1);
+                int result2 = getTotalDuration(o2) - getTotalDuration(o1);
                 if (result2 != 0) {
                     return result2;
                 }
@@ -56,9 +53,13 @@ public class AdvertisementManager {
         };
 
         Collections.sort(allPossibleCombinations, comparator);
+        List<Advertisement> optimalVideoSet = allPossibleCombinations.get(0);
+
+        //создаем и записывем событие "видео выбрано"
+        StatisticManager.getInstance().register(new VideoSelectedEventDataRow(optimalVideoSet, getTotalAmount(optimalVideoSet), getTotalDuration(optimalVideoSet)));
 
         //показываем лучший по параметрам набор
-        showVideos(allPossibleCombinations.get(0));
+        showVideos(optimalVideoSet);
     }
 
     private void recursive(List<Advertisement> combination, int currentIndex, int currentTime, List<List<Advertisement>> allPossibleCombinations) {
@@ -97,8 +98,8 @@ public class AdvertisementManager {
                 if (result1 != 0) {
                     return (int)result1;
                 } else {
-                    long result2 = o2.getAmountPerOneDisplaying()*1000 / o2.getDuration() -
-                                    o1.getAmountPerOneDisplaying()*1000 / o1.getDuration();
+                    long result2 = o1.getAmountPerOneDisplaying()*1000 / o1.getDuration() -
+                                    o2.getAmountPerOneDisplaying()*1000 / o2.getDuration();
                     return (int)result2;
                 }
             }
@@ -114,19 +115,19 @@ public class AdvertisementManager {
         }
     }
 
-    private long getSumAmount(List<Advertisement> videos) {
-        long result = 0;
+    private long getTotalAmount(List<Advertisement> videos) {
+        long totalAmount = 0;
         for (Advertisement ad : videos) {
-            result += ad.getAmountPerOneDisplaying();
+            totalAmount += ad.getAmountPerOneDisplaying();
         }
-        return result;
+        return totalAmount;
     }
 
-    private int getAllTime(List<Advertisement> videos) {
-        int result = 0;
+    private int getTotalDuration(List<Advertisement> videos) {
+        int totalTime = 0;
         for (Advertisement ad : videos) {
-            result += ad.getDuration();
+            totalTime += ad.getDuration();
         }
-        return result;
+        return totalTime;
     }
 }
