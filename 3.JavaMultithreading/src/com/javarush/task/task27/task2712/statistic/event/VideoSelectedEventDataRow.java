@@ -32,4 +32,12 @@ public class VideoSelectedEventDataRow implements EventDataRow {
     public int getTime() {
         return totalDuration;
     }
+
+    public long getAmount() {
+        return amount;
+    }
+
+    public void setDate(Date date) {
+        currentDate = date;
+    }
 }
