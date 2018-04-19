@@ -8,10 +8,14 @@ import java.util.List;
 
 public class Order {
     private final Tablet tablet;
-    private List<Dish> dishes;
+    protected List<Dish> dishes;
 
     public Order(Tablet tablet) throws IOException {
         this.tablet = tablet;
+        initDishes();
+    }
+
+    protected void initDishes() throws IOException {
         dishes = ConsoleHelper.getAllDishesForOrder();
     }
 
@@ -35,9 +39,4 @@ public class Order {
     public String toString() {
         return "Your order: " + dishes.toString() + " of " + tablet.toString();
     }
-
-    /*public static void main(String[] args) throws Exception {
-        System.out.println(new Order(new Tablet(1)).toString());
-
-    }*/
 }
