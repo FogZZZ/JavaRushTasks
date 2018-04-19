@@ -14,13 +14,11 @@ public class RandomOrderGeneratorTask implements Runnable {
 
     @Override
     public void run() {
-        int randIndex = (int)(Math.random()*allTablets.size());
-        Tablet randTablet = allTablets.get(randIndex);
-
-        //генерируем случайный заказ у randTablet каждые 100 мс
+        //генерируем случайный заказ у случайного планшета каждые 100 мс
         while (true) {
+            int randIndex = (int)(Math.random()*allTablets.size());
+            Tablet randTablet = allTablets.get(randIndex);
             randTablet.createTestOrder();
-            ConsoleHelper.writeMessage("");
             try {
                 Thread.sleep(interval);
             } catch (InterruptedException e) {

@@ -69,6 +69,10 @@ public class StatisticManager {
         }
     }
 
+    public Set<Cook> getCooks() {
+        return cooks;
+    }
+
     public Map<Date, Long> getDailyAmounts() {
         Map<Date, Long> dailyAmounts = new HashMap<>();
         List<EventDataRow> videoSelectedEvents = statisticStorage.get(EventType.SELECTED_VIDEOS);
