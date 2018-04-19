@@ -20,6 +20,7 @@ public class Restaurant {
         for (int i = 1; i <= 5; i++) {
             allTablets.add(new Tablet(i));
         }
+        OrderManager orderManager = new OrderManager();
 
         //регистрация в хранилищах, регистрация наблюдателей
         StatisticManager.getInstance().register(cook1);
@@ -27,8 +28,7 @@ public class Restaurant {
         cook1.addObserver(waiter);
         cook2.addObserver(waiter);
         for (int i = 0; i < 5; i++) {
-            allTablets.get(i).addObserver(cook1);
-            allTablets.get(i).addObserver(cook2);
+            allTablets.get(i).addObserver(orderManager);
         }
 
         //Создаем таск на генерацию случайных заказов (прерываем через 1 сек)

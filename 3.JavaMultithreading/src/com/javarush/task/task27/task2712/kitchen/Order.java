@@ -23,6 +23,10 @@ public class Order {
         return dishes.isEmpty();
     }
 
+    public Tablet getTablet() {
+        return tablet;
+    }
+
     public List<Dish> getDishes() {
         return dishes;
     }
