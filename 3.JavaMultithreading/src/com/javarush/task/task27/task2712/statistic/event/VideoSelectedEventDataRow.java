@@ -37,7 +37,8 @@ public class VideoSelectedEventDataRow implements EventDataRow {
         return amount;
     }
 
-    public void setDate(Date date) {
+    //удалить потом (или закомментить)
+    /*public void setDate(Date date) {
         currentDate = date;
-    }
+    }*/
 }

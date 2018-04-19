@@ -38,4 +38,9 @@ public class CookedOrderEventDataRow implements EventDataRow {
     public String getCookName() {
         return cookName;
     }
+
+    //удалить потом (или закомментить)
+    /*public void setDate(Date date) {
+        currentDate = date;
+    }*/
 }

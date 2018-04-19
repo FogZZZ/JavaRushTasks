@@ -26,7 +26,7 @@ public class Cook extends Observable implements Observer {
 
         setChanged();
         notifyObservers(arg);
-        StatisticManager.getInstance().register(new CookedOrderEventDataRow(o.toString(), this.name, order.getTotalCookingTime(), order.getDishes()));
+        StatisticManager.getInstance().register(new CookedOrderEventDataRow(o.toString(), this.name, order.getTotalCookingTime()*60, order.getDishes()));
     }
 
     @Override
