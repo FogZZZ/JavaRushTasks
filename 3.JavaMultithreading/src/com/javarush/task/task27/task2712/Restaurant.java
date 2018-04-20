@@ -11,6 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Restaurant {
     private static final int ORDER_CREATING_INTERVAL = 100;
     private final static LinkedBlockingQueue<Order> orderQueue = new LinkedBlockingQueue<>();
+    private final static LinkedBlockingQueue<Order> completedOrderQueue = new LinkedBlockingQueue<>();
 
     public static void main(String[] args) {
         //создание всех нужных объектов
@@ -18,6 +19,8 @@ public class Restaurant {
         Cook cook2 = new Cook("Андрей");
         cook1.setQueue(orderQueue);
         cook2.setQueue(orderQueue);
+        cook1.setCompletedOrderQueue(completedOrderQueue);
+        cook2.setCompletedOrderQueue(completedOrderQueue);
         Thread cookThread1 = new Thread(cook1);
         Thread cookThread2 = new Thread(cook2);
         cookThread1.start();
@@ -30,11 +33,11 @@ public class Restaurant {
             allTablets.put(tablet, true);
         }
         Waiter waiter = new Waiter(allTablets);
+        waiter.setCompletedOrderQueue(completedOrderQueue);
+        Thread waiterThread = new Thread(waiter);
+        waiterThread.start();
 
-        cook1.addObserver(waiter);
-        cook2.addObserver(waiter);
-
-        //Создаем таск на генерацию случайных заказов (прерываем через 1 сек)
+        //Создаем таск на генерацию случайных заказов (прерываем через 5 сек)
         Thread randomOrderGeneratorTask = new Thread(new RandomOrderGeneratorTask(allTablets, ORDER_CREATING_INTERVAL));
         randomOrderGeneratorTask.start();
 

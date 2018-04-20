@@ -9,10 +9,19 @@ import java.util.List;
 public class Order {
     private final Tablet tablet;
     protected List<Dish> dishes;
+    private Cook cook;
 
     public Order(Tablet tablet) throws IOException {
         this.tablet = tablet;
         initDishes();
+    }
+
+    public void setCook(Cook cook) {
+        this.cook = cook;
+    }
+
+    public Cook getCook() {
+        return cook;
     }
 
     protected void initDishes() throws IOException {
