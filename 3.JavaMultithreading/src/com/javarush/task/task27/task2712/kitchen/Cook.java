@@ -27,6 +27,7 @@ public class Cook extends Observable implements Runnable {
     public void startCookingOrder(Order order) {
         busy = true;
         ConsoleHelper.writeMessage("Start cooking - " + order + ", cooking time " + order.getTotalCookingTime() + "min");
+        ConsoleHelper.writeMessage("");
 
         //готовится...
         try {

@@ -4,8 +4,8 @@ import com.javarush.task.task27.task2712.kitchen.Cook;
 import com.javarush.task.task27.task2712.kitchen.Order;
 import com.javarush.task.task27.task2712.kitchen.Waiter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Restaurant {
@@ -23,14 +23,13 @@ public class Restaurant {
         cookThread1.start();
         cookThread2.start();
 
-        Waiter waiter = new Waiter();
-        DirectorTablet directorTablet = new DirectorTablet();
-        List<Tablet> allTablets = new ArrayList<>();
+        Map<Tablet, Boolean> allTablets = new ConcurrentHashMap<>();
         for (int i = 1; i <= 5; i++) {
             Tablet tablet = new Tablet(i);
             tablet.setQueue(orderQueue);
-            allTablets.add(tablet);
+            allTablets.put(tablet, true);
         }
+        Waiter waiter = new Waiter(allTablets);
 
         cook1.addObserver(waiter);
         cook2.addObserver(waiter);
@@ -45,7 +44,9 @@ public class Restaurant {
 
         randomOrderGeneratorTask.interrupt();
 
-        /*directorTablet.printAdvertisementProfit();
+        /*DirectorTablet directorTablet = new DirectorTablet();
+
+        directorTablet.printAdvertisementProfit();
         directorTablet.printCookWorkloading();
         directorTablet.printActiveVideoSet();
         directorTablet.printArchivedVideoSet();*/

@@ -12,8 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Tablet {
-    final int number;
-    static Logger logger = Logger.getLogger(Tablet.class.getName());
+    private final int number;
+    private static Logger logger = Logger.getLogger(Tablet.class.getName());
     private LinkedBlockingQueue<Order> queue;
 
     public Tablet(int number) {
@@ -42,6 +42,8 @@ public class Tablet {
             Order order = new TestOrder(this);
 
             utilMethod(order);
+
+            ConsoleHelper.writeMessage("");
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Console is unavailable.");

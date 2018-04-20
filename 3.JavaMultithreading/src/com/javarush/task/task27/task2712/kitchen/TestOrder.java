@@ -3,10 +3,10 @@ package com.javarush.task.task27.task2712.kitchen;
 import com.javarush.task.task27.task2712.Tablet;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TestOrder extends Order {
     public TestOrder(Tablet tablet) throws IOException {
@@ -17,7 +17,7 @@ public class TestOrder extends Order {
     protected void initDishes() throws IOException {
         List<Dish> randDishes;
         Dish[] allDishes = Dish.values();
-        int randNum = (int)(1 + Math.random()*allDishes.length);
+        int randNum = ThreadLocalRandom.current().nextInt(1, allDishes.length+1);
 
         //Вытаскиваем несколько рандомных блюд
         List<Dish> allDishesCopy = Arrays.asList(allDishes);
