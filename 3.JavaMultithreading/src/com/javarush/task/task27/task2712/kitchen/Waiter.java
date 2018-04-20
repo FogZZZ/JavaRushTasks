@@ -20,9 +20,21 @@ public class Waiter implements Observer {
         ConsoleHelper.writeMessage(arg + " was cooked by " + o);
         ConsoleHelper.writeMessage("");
 
-        //Клиенты съели все
+        //Запускаем поток 'Клиенты едят, потом свобождают столик'
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Order order = (Order)arg;
+                    int eatingTime = order.getTotalCookingTime()*20;
+                    //Клиенты едят
+                    Thread.sleep(eatingTime);
 
-        //'Освобождаем' столик-планшет
-        allTablets.put(((Order)arg).getTablet(), true);
+                    //Клиенты закончили, 'освобождаем' столик-планшет
+                    allTablets.put(order.getTablet(), true);
+
+                } catch (InterruptedException e) {}
+            }
+        }).start();
     }
 }
