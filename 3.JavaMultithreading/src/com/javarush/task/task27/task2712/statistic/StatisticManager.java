@@ -20,14 +20,9 @@ public class StatisticManager {
 /*........................................................................................*/
 
     private StatisticStorage statisticStorage = new StatisticStorage();
-    private Set<Cook> cooks = new HashSet<>();
 
     public void register(EventDataRow data) {
         statisticStorage.put(data);
-    }
-
-    public void register(Cook cook) {
-        cooks.add(cook);
     }
 
     private class StatisticStorage {
@@ -67,10 +62,6 @@ public class StatisticManager {
         private List<EventDataRow> get(EventType eventType) {
             return storage.get(eventType);
         }
-    }
-
-    public Set<Cook> getCooks() {
-        return cooks;
     }
 
     public Map<Date, Long> getDailyAmounts() {
