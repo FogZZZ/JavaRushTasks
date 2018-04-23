@@ -14,7 +14,7 @@ public class AdvertisementManager {
         this.timeSeconds = timeSeconds;
     }
 
-    public void processVideos() throws NoVideoAvailableException {
+    public List<Advertisement> processVideos() throws NoVideoAvailableException {
         if (storage.list() == null || storage.list().isEmpty()) {
             throw new NoVideoAvailableException();
         }
@@ -60,6 +60,8 @@ public class AdvertisementManager {
 
         //показываем лучший по параметрам набор
         showVideos(optimalVideoSet);
+
+        return optimalVideoSet;
     }
 
     private void recursive(List<Advertisement> combination, int currentIndex, int currentTime, List<List<Advertisement>> allPossibleCombinations) {

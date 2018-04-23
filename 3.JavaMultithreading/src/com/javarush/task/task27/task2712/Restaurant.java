@@ -27,7 +27,7 @@ public class Restaurant {
         cookThread2.start();
 
         Map<Tablet, Boolean> allTablets = new ConcurrentHashMap<>();
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 1; i++) {
             Tablet tablet = new Tablet(i);
             tablet.setQueue(orderQueue);
             allTablets.put(tablet, true);
@@ -38,14 +38,14 @@ public class Restaurant {
         waiterThread.start();
 
         //Создаем таск на генерацию случайных заказов (прерываем через 5 сек)
-        Thread randomOrderGeneratorTask = new Thread(new RandomOrderGeneratorTask(allTablets, ORDER_CREATING_INTERVAL));
+        /*Thread randomOrderGeneratorTask = new Thread(new RandomOrderGeneratorTask(allTablets, ORDER_CREATING_INTERVAL));
         randomOrderGeneratorTask.start();
 
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {}
 
-        randomOrderGeneratorTask.interrupt();
+        randomOrderGeneratorTask.interrupt();*/
 
         /*DirectorTablet directorTablet = new DirectorTablet();
 

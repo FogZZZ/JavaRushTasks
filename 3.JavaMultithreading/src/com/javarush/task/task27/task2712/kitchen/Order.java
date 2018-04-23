@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class Order {
-    private final Tablet tablet;
+    protected final Tablet tablet;
     protected List<Dish> dishes;
     private Cook cook;
 

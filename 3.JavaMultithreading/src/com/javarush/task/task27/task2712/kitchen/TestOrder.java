@@ -14,7 +14,7 @@ public class TestOrder extends Order {
     }
 
     @Override
-    protected void initDishes() throws IOException {
+    protected void initDishes() {
         List<Dish> randDishes;
         Dish[] allDishes = Dish.values();
         int randNum = ThreadLocalRandom.current().nextInt(1, allDishes.length+1);
