@@ -1,15 +1,23 @@
 package com.javarush.task.task35.task3513;
 
+import java.math.BigInteger;
 import java.util.*;
 
 public class Model {
     private final static int FIELD_WIDTH = 4;
     private Tile[][] gameTiles;
+
     int score;
     int maxTile;
+
     private Stack<Tile[][]> previousStates = new Stack<>();
     private Stack<Integer> previousScores = new Stack<>();
+    private Stack<Integer> previousMaxTiles = new Stack<>();
     private boolean isSaveNeeded = true;
+
+    private final int ANALYSIS_DEPTH = 5;
+    private Move[] basicMoves = new Move[] {this::left, this::up, this::right, this::down};
+
 
     public Model() {
         resetGameTiles();
@@ -98,10 +106,10 @@ public class Model {
         for (int i = 0; i < tiles.length-1; i++) {
             if (tiles[i].value != 0 && tiles[i].value == tiles[i+1].value) {
                 changed = true;
+                tiles[i].value *= 2;
+
                 score += tiles[i].value;
                 maxTile = tiles[i].value > maxTile ? tiles[i].value : maxTile;
-
-                tiles[i].value *= 2;
 
                 for (int j = i+1; j < tiles.length-1; j++) {
                     tiles[j].value = tiles[j+1].value;
@@ -187,14 +195,16 @@ public class Model {
         }
         previousStates.push(savedTiles);
         previousScores.push(score);
+        previousMaxTiles.push(maxTile);
 
         isSaveNeeded = false;
     }
 
-    public void rollback() {
+    void rollback() {
         if (!previousStates.empty() && !previousScores.empty()) {
             gameTiles = previousStates.pop();
             score = previousScores.pop();
+            maxTile = previousMaxTiles.pop();
         }
     }
 
@@ -209,13 +219,39 @@ public class Model {
     }
 
     void autoMove() {
-        PriorityQueue<MoveEfficiency> possibleMoves = new PriorityQueue<>(4, Collections.reverseOrder());
-        possibleMoves.offer(getMoveEfficiency(this::left));
-        possibleMoves.offer(getMoveEfficiency(this::up));
-        possibleMoves.offer(getMoveEfficiency(this::right));
-        possibleMoves.offer(getMoveEfficiency(this::down));
+        int numOfVariants = (int)Math.pow(4, ANALYSIS_DEPTH);
+        Map<Move, Move> firstSteps = new HashMap<>();
+        PriorityQueue<MoveEfficiency> possibleMoves = new PriorityQueue<>(numOfVariants, Collections.reverseOrder());
 
-        possibleMoves.poll().getMove().move();
+        Move[][] complexMoves = new Move[numOfVariants][ANALYSIS_DEPTH];
+        BigInteger bi = new BigInteger("0", 4);
+
+        for (int i = 0; i < numOfVariants; i++) {
+            String s = bi.toString(4);
+            String format = String.format("%%%ds", ANALYSIS_DEPTH);
+            s = String.format(format, s).replace(' ', '0');
+            for (int j = 0; j < s.length(); j++) {
+                int indexOfBasics = Character.digit(s.charAt(j), 10);
+                complexMoves[i][j] = basicMoves[indexOfBasics];
+            }
+            bi = bi.add(new BigInteger("1"));
+        }
+
+        for (int i = 0; i < numOfVariants; i++) {
+            final int finI = i;
+            Move complexMove = new Move() {
+                public void move() {
+                    for (int j = 0; j < ANALYSIS_DEPTH; j++) {
+                        complexMoves[finI][j].move();
+                    }
+                }
+            };
+            possibleMoves.offer(getMoveEfficiency(complexMove));
+            firstSteps.put(complexMove, complexMoves[finI][0]);
+        }
+
+        Move bestComplexMove = possibleMoves.poll().getMove();
+        firstSteps.get(bestComplexMove).move();
     }
 
     boolean hasBoardChanged() {
@@ -227,7 +263,8 @@ public class Model {
         }
         for (int i = 0; i < FIELD_WIDTH; i++) {
             for (int j = 0; j < FIELD_WIDTH; j++) {
-                sumBefore += previousStates.peek()[i][j].value;
+                //sumBefore += previousStates.peek()[i][j].value;
+                sumBefore += previousStates.get(previousStates.size()-ANALYSIS_DEPTH)[i][j].value;
             }
         }
         return sumAfter != sumBefore;
@@ -239,7 +276,9 @@ public class Model {
         if (hasBoardChanged()) {
             moveEfficiency = new MoveEfficiency(getEmptyTiles().size(), score, move);
         }
-        rollback();
+        for (int i = 0; i < ANALYSIS_DEPTH; i++) {
+            rollback();
+        }
         return moveEfficiency;
     }
 }

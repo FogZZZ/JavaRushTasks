@@ -23,10 +23,8 @@ public class Controller extends KeyAdapter {
     }
 
     void resetGame() {
-        view.isGameLost = false;
-        view.isGameWon = false;
-
         model.score = 0;
+        model.maxTile = 0;
 
         model.resetGameTiles();
     }
@@ -42,32 +40,33 @@ public class Controller extends KeyAdapter {
         }
 
         if (!model.canMove()) {
-            view.isGameLost = true;
+            view.showLostDialog();
+            view.repaint();
+            return;
         }
 
-        if (!view.isGameLost && !view.isGameWon) {
-            if (e.getKeyCode() ==  KeyEvent.VK_LEFT) {
-                model.left();
-            }
-            if (e.getKeyCode() ==  KeyEvent.VK_RIGHT) {
-                model.right();
-            }
-            if (e.getKeyCode() ==  KeyEvent.VK_UP) {
-                model.up();
-            }
-            if (e.getKeyCode() ==  KeyEvent.VK_DOWN) {
-                model.down();
-            }
-            if (e.getKeyCode() == KeyEvent.VK_R) {
-                model.randomMove();
-            }
-            if (e.getKeyCode() == KeyEvent.VK_A) {
-                model.autoMove();
-            }
+        if (e.getKeyCode() ==  KeyEvent.VK_LEFT) {
+            model.left();
+        }
+        if (e.getKeyCode() ==  KeyEvent.VK_RIGHT) {
+            model.right();
+        }
+        if (e.getKeyCode() ==  KeyEvent.VK_UP) {
+            model.up();
+        }
+        if (e.getKeyCode() ==  KeyEvent.VK_DOWN) {
+            model.down();
+        }
+        if (e.getKeyCode() == KeyEvent.VK_R) {
+            model.randomMove();
+        }
+        if (e.getKeyCode() == KeyEvent.VK_A) {
+            model.autoMove();
         }
 
         if (model.maxTile == WINNING_TILE) {
-            view.isGameWon = true;
+            view.repaint();
+            view.showWinDialog();
         }
 
         view.repaint();

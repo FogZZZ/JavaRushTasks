@@ -11,9 +11,6 @@ public class View extends JPanel {
 
     private Controller controller;
 
-    boolean isGameWon = false;
-    boolean isGameLost = false;
-
     public View(Controller controller) {
         setFocusable(true);
         this.controller = controller;
@@ -32,12 +29,14 @@ public class View extends JPanel {
         }
 
         g.drawString("Score: " + controller.getScore(), 140, 465);
+    }
 
-        if (isGameWon) {
-            JOptionPane.showMessageDialog(this, "You've won!");
-        } else if(isGameLost) {
-            JOptionPane.showMessageDialog(this, "You've lost :(");
-        }
+    void showLostDialog() {
+        JOptionPane.showMessageDialog(this, "You've lost :(");
+    }
+
+    void showWinDialog() {
+        JOptionPane.showMessageDialog(this, "You've won!");
     }
 
     private void drawTile(Graphics g2, Tile tile, int x, int y) {
