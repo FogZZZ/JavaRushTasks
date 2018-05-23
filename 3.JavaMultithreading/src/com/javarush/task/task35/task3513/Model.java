@@ -239,11 +239,9 @@ public class Model {
 
         for (int i = 0; i < numOfVariants; i++) {
             final int finI = i;
-            Move complexMove = new Move() {
-                public void move() {
-                    for (int j = 0; j < ANALYSIS_DEPTH; j++) {
-                        complexMoves[finI][j].move();
-                    }
+            Move complexMove = () -> {
+                for (int j = 0; j < ANALYSIS_DEPTH; j++) {
+                    complexMoves[finI][j].move();
                 }
             };
             possibleMoves.offer(getMoveEfficiency(complexMove));
