@@ -17,7 +17,7 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
     public CustomTree() {
         this.root = new Entry<>("0");
         root.lineNumber = 0;
-        lines = 1;
+        lines = 0;
         size = 0;
     }
 
@@ -90,7 +90,7 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
             elementToRemove.parent.rightChild = null;
         }
 
-        lines = getMaxLine(root, 1);
+        lines = getMaxLine(root, 0);
         size -= getSizeOfSubtree(elementToRemove);
         return true;
     }
@@ -117,7 +117,7 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
     Entry<String> findParentToAddElement(Entry<String> currentElement) {
         currentElement.checkChildren();
 
-        if (currentElement.lineNumber == lines-1) {
+        if (lines == 0 || currentElement.lineNumber == lines-1) {
             if (currentElement.isAvailableToAddChildren()) {
                 return currentElement;
             } else {
@@ -144,18 +144,18 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
         return null;
     }
 
-    int getMaxLine(Entry<String> currentEntry, int currentMaxDepth) {
+    int getMaxLine(Entry<String> currentEntry, int currentMaxLine) {
         currentEntry.checkChildren();
-        if (currentMaxDepth < currentEntry.lineNumber) {
-            currentMaxDepth = currentEntry.lineNumber;
+        if (currentMaxLine < currentEntry.lineNumber) {
+            currentMaxLine = currentEntry.lineNumber;
         }
         if (!currentEntry.availableToAddLeftChildren) {
-            currentMaxDepth = getMaxLine(currentEntry.leftChild, currentMaxDepth);
+            currentMaxLine = getMaxLine(currentEntry.leftChild, currentMaxLine);
         }
         if (!currentEntry.availableToAddRightChildren) {
-            currentMaxDepth = getMaxLine(currentEntry.rightChild, currentMaxDepth);
+            currentMaxLine = getMaxLine(currentEntry.rightChild, currentMaxLine);
         }
-        return currentMaxDepth;
+        return currentMaxLine;
     }
 
     int getSizeOfSubtree(Entry<String> currentEntry) {
