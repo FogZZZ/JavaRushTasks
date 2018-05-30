@@ -10,7 +10,7 @@ import java.util.List;
 */
 public class CustomTree extends AbstractList<String> implements Cloneable, Serializable {
     private Entry<String> root;
-    private Entry<String> elementToAddToNewLine;
+    private Entry<String> parentForNewElementOnNewLine;
     private int size;
     private int lines;
 
@@ -23,27 +23,24 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
 
     @Override
     public boolean add(String s) {
-        Entry<String> parentToAddElement = findParentToAddElement(root);
+        Entry<String> parentToAddElement = findParentForNewElement(root);
 
         if (parentToAddElement == null) {
-            addElement(elementToAddToNewLine, true, s);
-            return true;
+            return addElement(parentForNewElementOnNewLine, true, s);
         }
 
         if (parentToAddElement.availableToAddLeftChildren) {
-            addElement(parentToAddElement, true, s);
-            return true;
+            return addElement(parentToAddElement, true, s);
         }
 
         if (parentToAddElement.availableToAddRightChildren) {
-            addElement(parentToAddElement, false, s);
-            return true;
+            return addElement(parentToAddElement, false, s);
         }
 
         return false;
     }
 
-    void addElement(Entry<String> parent, boolean isLeft, String s) {
+    boolean addElement(Entry<String> parent, boolean isLeft, String s) {
         Entry<String> child = new Entry<>(s);
         if (isLeft) {
             parent.leftChild = child;
@@ -54,7 +51,8 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
         child.lineNumber = parent.lineNumber + 1;
         lines = child.lineNumber;
         size++;
-        elementToAddToNewLine = null;
+        parentForNewElementOnNewLine = null;
+        return true;
     }
 
     @Override
@@ -114,29 +112,29 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
         return null;
     }
 
-    Entry<String> findParentToAddElement(Entry<String> currentElement) {
+    Entry<String> findParentForNewElement(Entry<String> currentElement) {
         currentElement.checkChildren();
 
         if (lines == 0 || currentElement.lineNumber == lines-1) {
             if (currentElement.isAvailableToAddChildren()) {
                 return currentElement;
             } else {
-                if (elementToAddToNewLine == null) {
-                    elementToAddToNewLine = currentElement.leftChild;
+                if (parentForNewElementOnNewLine == null) {
+                    parentForNewElementOnNewLine = currentElement.leftChild == null ? currentElement.rightChild : currentElement.leftChild;
                 }
                 return null;
             }
         }
 
-        if (!currentElement.availableToAddLeftChildren) {
-            Entry<String> leftFind = findParentToAddElement(currentElement.leftChild);
+        if (currentElement.leftChild != null) {
+            Entry<String> leftFind = findParentForNewElement(currentElement.leftChild);
             if (leftFind != null) {
                 return leftFind;
             }
         }
 
-        if (!currentElement.availableToAddRightChildren) {
-            Entry<String> rightFind = findParentToAddElement(currentElement.rightChild);
+        if (currentElement.rightChild != null) {
+            Entry<String> rightFind = findParentForNewElement(currentElement.rightChild);
             if (rightFind != null) {
                 return rightFind;
             }
@@ -149,10 +147,10 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
         if (currentMaxLine < currentEntry.lineNumber) {
             currentMaxLine = currentEntry.lineNumber;
         }
-        if (!currentEntry.availableToAddLeftChildren) {
+        if (currentEntry.leftChild != null) {
             currentMaxLine = getMaxLine(currentEntry.leftChild, currentMaxLine);
         }
-        if (!currentEntry.availableToAddRightChildren) {
+        if (currentEntry.rightChild != null) {
             currentMaxLine = getMaxLine(currentEntry.rightChild, currentMaxLine);
         }
         return currentMaxLine;
@@ -170,6 +168,7 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
         return currentSize;
     }
 
+
     static class Entry<T> implements Serializable {
         String elementName;
         int lineNumber;
@@ -185,13 +184,9 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
         void checkChildren() {
             if (leftChild != null) {
                 availableToAddLeftChildren = false;
-            } else {
-                availableToAddLeftChildren = true;
             }
             if (rightChild != null) {
                 availableToAddRightChildren = false;
-            } else {
-                availableToAddRightChildren = true;
             }
         }
 
@@ -199,6 +194,12 @@ public class CustomTree extends AbstractList<String> implements Cloneable, Seria
             return availableToAddLeftChildren || availableToAddRightChildren;
         }
     }
+
+
+
+
+
+
 
     @Override
     public String get(int index) {

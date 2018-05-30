@@ -28,7 +28,7 @@ public class Solution {
 
         list.remove("7");
         list.add("17");
-        System.out.println("Expected parent is 3, actual parent is " + ((CustomTree) list).getParent("17"));
+        System.out.println("Expected parent is 8, actual parent is " + ((CustomTree) list).getParent("17"));
 
 
         list.remove("3");
@@ -44,5 +44,6 @@ public class Solution {
         //System.out.println("List size is " + list.size());
         System.out.println("Expected true, actual " + list.add("20"));
         System.out.println("Expected parent is 1, actual parent is " + ((CustomTree) list).getParent("20"));
+        System.out.println("List size is " + list.size());
     }
 }
